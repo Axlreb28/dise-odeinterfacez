@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>App Médica Interactiva</title>
+
+<style>
+    :root {
+        --green: #08CB00;
+        --dark: #253900;
+        --black: #000000;
+        --light: #EEEEEE;
+        --white: #FFFFFF;
+    }
+
+    body {
+        background: var(--white);
+        font-family: Arial, sans-serif;
+        margin: 0;
+        padding: 20px;
+        color: var(--black);
+    }
+
+    h1 {
+        text-align: center;
+        font-weight: 700;
+        color: var(--dark);
+        margin-bottom: 30px;
+    }
+
+    .grid {
+        display: grid;
+        gap: 40px;
+        grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    }
+
+    /* Phone frame */
+    .phone {
+        border: 2px solid var(--light);
+        border-radius: 20px;
+        width: 100%;
+        max-width: 360px;
+        margin: auto;
+        padding: 20px;
+        background: var(--white);
+    }
+
+    .section-title {
+        font-size: 16px;
+        font-weight: bold;
+        color: var(--dark);
+        margin-bottom: 10px;
+        text-transform: uppercase;
+    }
+
+    .block {
+        border: 1px solid var(--light);
+        border-radius: 12px;
+        padding: 14px;
+        margin-bottom: 16px;
+        background: var(--white);
+    }
+
+    .label {
+        font-size: 12px;
+        text-transform: uppercase;
+        color: var(--dark);
+        opacity: 0.7;
+        margin-bottom: 4px;
+    }
+
+    .value {
+        font-size: 18px;
+        font-weight: bold;
+    }
+
+    .chip {
+        display: inline-block;
+        padding: 6px 12px;
+        border-radius: 20px;
+        font-size: 12px;
+        margin-right: 6px;
+        margin-top: 6px;
+        cursor: default;
+        border: 1px solid var(--light);
+    }
+    .chip-green { background: var(--green); color: white; border-color: var(--green); }
+    .chip-yellow { background: #E8E88A; }
+    .chip-red { background: #FFB3B3; }
+
+    .btn {
+        padding: 10px;
+        text-align: center;
+        border-radius: 10px;
+        border: 1px solid var(--light);
+        margin-top: 10px;
+        cursor: pointer;
+        font-weight: bold;
+        user-select: none;
+        transition: 0.2s;
+    }
+    .btn:active { transform: scale(0.95); }
+    .btn-green {
+        background: var(--green);
+        color: white;
+        border: none;
+    }
+
+    /* Animación suave */
+    .fade {
+        animation: fade 0.4s ease;
+    }
+    @keyframes fade {
+        from { opacity: 0; transform: translateY(4px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+</style>
+</head>
+
+<body>
+
+<h1>App de Medicación Interactiva</h1>
+
+<div class="grid">
+
+    <!-- ✅ Pantalla Principal -->
+    <div>
+        <div class="section-title">Pantalla Principal</div>
+
+        <div class="phone">
+
+            <div class="block">
+                <div class="label">Medicamento</div>
+                <div class="value" id="med-name">Metformina 850 mg</div>
+            </div>
+
+            <div class="block">
+                <div class="label">Próxima dosis</div>
+                <div class="value" id="next-dose">8:00 PM</div>
+
+                <div class="label" style="margin-top:10px;">Estado</div>
+                <div id="status-chips">
+                    <div class="chip chip-green fade">Tomado (8 AM)</div>
+                    <div class="chip chip-yellow fade">Pendiente 8 PM</div>
+                </div>
+            </div>
+
+            <div class="block">
+                <div class="label">Nivel de batería</div>
+                <div class="value" id="battery">78%</div>
+            </div>
+
+            <div class="block">
+                <div class="btn btn-green" onclick="contactar()">Contactar cuidador</div>
+                <div class="btn" onclick="farmacia()">Farmacia</div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- ✅ Pantalla Configuración -->
+    <div>
+        <div class="section-title">Pantalla de Configuración</div>
+
+        <div class="phone">
+
+            <div class="block">
+                <div class="label">Recordatorios</div>
+                <div class="chip chip-green" id="recordatorios-chip" onclick="toggleRecordatorios()">Activos</div>
+            </div>
+
+            <div class="block">
+                <div class="label">Agregar medicamento</div>
+                <div class="btn btn-green" onclick="agregarMedicamento()">Agregar</div>
+            </div>
+
+            <div class="block" id="historial-block">
+                <div class="label">Historial</div>
+                <div class="chip chip-green fade">Tomado hoy 8 AM</div>
+                <div class="chip chip-yellow fade">Ayer 8 PM</div>
+                <div class="chip chip-red fade">Olvidado</div>
+            </div>
+
+            <div class="block">
+                <div class="label">Alertas</div>
+                <div class="chip chip-green">Envío automático activo</div>
+            </div>
+
+            <div class="block">
+                <div class="label">Acciones</div>
+                <div class="btn btn-green" onclick="marcarTomado()">Marcar dosis como tomada</div>
+                <div class="btn" onclick="posponer()">Posponer 10 min</div>
+            </div>
+
+        </div>
+    </div>
+
+</div>
+
+<script>
+/* ✅ INTERACTIVIDAD */
+
+// Cambiar estado recordatorios
+function toggleRecordatorios() {
+    const chip = document.getElementById("recordatorios-chip");
+    if (chip.classList.contains("chip-green")) {
+        chip.classList.remove("chip-green");
+        chip.textContent = "Inactivos";
+    } else {
+        chip.classList.add("chip-green");
+        chip.textContent = "Activos";
+    }
+}
+
+// Marcar dosis como tomada
+function marcarTomado() {
+    const status = document.getElementById("status-chips");
+    status.innerHTML = `
+        <div class="chip chip-green fade">Tomado (ahora)</div>
+    `;
+    alert("✅ Dosis marcada como tomada.");
+}
+
+// Posponer dosis
+function posponer() {
+    document.getElementById("next-dose").textContent = "8:10 PM";
+    alert("🔔 Recordatorio pospuesto 10 minutos.");
+}
+
+// Contacto cuidador
+function contactar() {
+    alert("📩 Mensaje enviado al cuidador.");
+}
+
+// Farmacia
+function farmacia() {
+    alert("📞 Llamando a farmacia...");
+}
+
+// Agregar medicamento
+function agregarMedicamento() {
+    const newMed = prompt("Nombre del nuevo medicamento:");
+    if (newMed) {
+        document.getElementById("med-name").textContent = newMed;
+        alert("✅ Medicamento agregado.");
+    }
+}
+</script>
+
+</body>
+</html>
+
